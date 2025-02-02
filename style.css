@@ -1,33 +1,68 @@
-/* style.css in the root directory */
+/* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
     margin: 0;
+    padding: 0;
+    background-color: #f4f7fa;
+    color: #333;
+}
+
+.container {
     padding: 20px;
+    text-align: center;
 }
 
 h1 {
+    font-size: 24px;
     color: #007ACC;
+    margin-bottom: 20px;
 }
 
-pre {
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+/* Graph Container */
+.graph-container {
+    width: 80%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007ACC;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
+.mermaid {
+    display: block;
+    margin: 0 auto;
+    padding: 15px;
+    max-height: 600px;
+    overflow-y: auto;
+    width: 100%;
 }
 
-button:hover {
-    background-color: #005F8C;
+/* Styling the Mermaid graph */
+.mermaid svg {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.mermaid svg:hover {
+    transform: scale(1.05);
+}
+
+/* Add some padding inside the graph container */
+.graph-container .mermaid {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+/* Improve the Webview layout for responsiveness */
+@media (max-width: 768px) {
+    .graph-container {
+        width: 90%;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
 }

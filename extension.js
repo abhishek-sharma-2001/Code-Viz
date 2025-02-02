@@ -54,26 +54,23 @@ function activate(context) {
 
 async function generateMermaidDiagram(filePath, selectedFunction) {
     try {
-        // Debugging: Show the file path and selected function
         console.log("Generating Mermaid diagram for:", filePath);
         console.log("Selected function:", selectedFunction);
 
         // Resolve function calls for the given file
         const functionCalls = await resolveDependencies(filePath);
         
-        // Debugging: Show the resolved function calls
         console.log("Resolved function calls:", functionCalls);
 
         if (!functionCalls || functionCalls.size === 0) {
             console.log("No function calls found.");
-            return null;
+            return "graph TD\n  No function calls found"; // Provide a fallback for no function calls
         }
 
         // Convert the function calls to Mermaid syntax
-		console.log("functioncalls: " + [...functionCalls]);
+        console.log("functioncalls:", [...functionCalls]);
         const mermaidStr = convertMapToMermaid(functionCalls);
 
-        // Debugging: Show the generated Mermaid string
         console.log("Generated Mermaid Diagram String:", mermaidStr);
 
         return mermaidStr;
@@ -83,6 +80,7 @@ async function generateMermaidDiagram(filePath, selectedFunction) {
         return null;
     }
 }
+
 
 function getWebviewContent(mermaidSnip) {
     return `
@@ -95,6 +93,9 @@ function getWebviewContent(mermaidSnip) {
             <script type="module">
                 import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
                 mermaid.initialize({ startOnLoad: true });
+                window.addEventListener('load', () => {
+                    mermaid.init();
+                });
             </script>
             <style>
                 body { font-family: Arial, sans-serif; }
@@ -111,6 +112,7 @@ function getWebviewContent(mermaidSnip) {
         </html>
     `;
 }
+
 
 function escapeHtml(text) {
     return text
