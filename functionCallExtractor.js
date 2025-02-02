@@ -156,25 +156,33 @@ function saveGraphvizFile(dotContent, outputFilePath) {
 }
 
 function convertMapToMermaid(map) {
-  if (!(map instanceof Map)) {
-    throw new Error("Input must be a Map");
-  }
+    if (!(map instanceof Map)) {
+        throw new Error("Input must be a Map");
+    }
 
-  let mermaidStr = "graph TD\n";
+    let mermaidStr = "graph TD\n";
 
-  map.forEach((value, key) => {
-    if (Array.isArray(value)) {
-      const uniqueValues = [...new Set(value)]; // Remove duplicates
-      uniqueValues.forEach((v) => {
-        mermaidStr += `  ${key} --> ${v}\n`;
-      });
-    } else {
-      mermaidStr += `  ${key} --> ${value}\n`;
-    }
-  });
+    // Handling case for single function with no calls
+    if (map.size === 1) {
+        const [key, value] = [...map.entries()][0];
+        // Add the function itself if there are no calls
+        mermaidStr += `  ${key}\n`;
+    } else {
+        map.forEach((value, key) => {
+            if (Array.isArray(value)) {
+                const uniqueValues = [...new Set(value)]; // Remove duplicates
+                uniqueValues.forEach((v) => {
+                    mermaidStr += `  ${key} --> ${v}\n`;
+                });
+            } else {
+                mermaidStr += `  ${key} --> ${value}\n`;
+            }
+        });
+    }
 
-  return mermaidStr;
+    return mermaidStr;
 }
+
 
 // Example usage
 // const startingFile = "v2/fileA.py"; // Change this if needed
