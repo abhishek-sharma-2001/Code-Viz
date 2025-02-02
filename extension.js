@@ -104,10 +104,12 @@ function getWebviewContent(mermaidSnip) {
             </style>
         </head>
         <body>
+        <center>
             <h1>Mermaid Flowchart</h1>
             <div class="mermaid">
                 ${escapeHtml(mermaidSnip)}
             </div>
+        </center>
         </body>
         </html>
     `;
