@@ -134,14 +134,14 @@ function getWebviewContent(mermaidSnip) {
         <style>
             /* General Layout for the Page */
             body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Arial', sans-serif;
                 margin: 0;
                 padding: 0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 height: 100vh;
-                background: linear-gradient(135deg, #f0f4f8, #e0e7f1); /* Gradient background */
+                background: linear-gradient(135deg, #e0e7f1, #f0f4f8); /* Soft gradient background */
                 box-sizing: border-box;
                 overflow: hidden;
             }
@@ -154,10 +154,10 @@ function getWebviewContent(mermaidSnip) {
                 justify-content: center;
                 width: 100%;
                 max-width: 1200px;
-                padding: 20px;
+                padding: 30px;
                 background-color: #ffffff;
-                border-radius: 12px;
-                box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+                border-radius: 15px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
                 overflow: hidden;
                 text-align: center;
                 max-height: 95vh;
@@ -165,18 +165,18 @@ function getWebviewContent(mermaidSnip) {
 
             /* Heading Style */
             h1 {
-                font-size: 2.5rem;
+                font-size: 2.8rem;
                 color: #007ACC;
-                margin-bottom: 30px;
+                margin-bottom: 20px;
                 font-weight: bold;
-                letter-spacing: 2px;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+                letter-spacing: 1px;
+                text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
             }
 
             /* Responsiveness for smaller screens */
             @media (max-width: 768px) {
                 h1 {
-                    font-size: 2rem;
+                    font-size: 2.2rem;
                 }
 
                 .mermaid {
@@ -186,7 +186,7 @@ function getWebviewContent(mermaidSnip) {
 
             @media (max-width: 480px) {
                 h1 {
-                    font-size: 1.5rem;
+                    font-size: 1.8rem;
                 }
 
                 .mermaid {
@@ -201,6 +201,9 @@ function getWebviewContent(mermaidSnip) {
                 overflow: auto;
                 display: block;
                 margin: 20px 0;
+                border: 2px solid #007ACC; /* Border around the chart */
+                border-radius: 10px;
+                background-color: #f9f9f9; /* Light background for the chart */
             }
 
             /* Mermaid Specific Styles (Customizing Node and Arrow Styles) */
@@ -208,8 +211,8 @@ function getWebviewContent(mermaidSnip) {
                 fill: #4e73df; /* Blue Background */
                 stroke: #2c3e50; /* Darker border */
                 stroke-width: 2px;
-                rx: 5px; /* Rounded corners */
-                ry: 5px;
+                rx: 8px; /* Rounded corners */
+                ry: 8px;
             }
 
             .mermaid .node text {
@@ -222,7 +225,7 @@ function getWebviewContent(mermaidSnip) {
                 text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Light text shadow */
                 word-wrap: break-word;
                 white-space: normal;
-                padding: 8px; /* Padding for readability */
+                padding: 10px; /* Padding for readability */
             }
 
             /* Customizing edges (arrows between functions) */
@@ -239,7 +242,7 @@ function getWebviewContent(mermaidSnip) {
             }
 
             .mermaid .edgeLabel {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Arial', sans-serif;
                 font-size: 14px;
                 fill: #e74c3c; /* Red color for edge labels */
                 font-weight: bold;
