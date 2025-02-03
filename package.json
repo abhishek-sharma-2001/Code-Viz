@@ -12,23 +12,28 @@
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
-    "commands": [
+  "commands": [
+    {
+      "command": "extension.showMermaidFlowchart",
+      "title": "Show Mermaid Flowchart"
+    }
+  ],
+  "menus": {
+    "editor/context": [
       {
         "command": "extension.showMermaidFlowchart",
-        "title": "Show Mermaid Flowchart"
+        "when": "editorHasSelection",
+        "group": "navigation"
+      },
+      {
+        "command": "extension.showMermaidFlowchart",
+        "when": "editorTextFocus && !editorHasSelection",
+        "group": "navigation"
       }
-    ],
-    "menus": {
-      "editor/context": [
-        {
-          "command": "extension.showMermaidFlowchart",
-          "when": "editorHasSelection",
-          "group": "navigation"
-        }
-      ]
-    }
-  },
-  "scripts": {
+    ]
+  }
+}
+  ,"scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "vscode-test"

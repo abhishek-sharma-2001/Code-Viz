@@ -183,6 +183,38 @@ function convertMapToMermaid(map) {
     return mermaidStr;
 }
 
+async function extractFunctionFromPosition(filePath, position) {
+    const parser = new Parser();
+    parser.setLanguage(Python);
+
+    const sourceCode = fs.readFileSync(filePath, "utf-8");
+    const tree = parser.parse(sourceCode);
+
+    // Traverse the tree to find the function at the position
+    let currentFunction = null;
+
+    const traverse = (node) => {
+        if (node.type === "function_definition") {
+            const startPosition = node.startPosition;
+            const endPosition = node.endPosition;
+
+            if (
+                position.line >= startPosition.row &&
+                position.line <= endPosition.row
+            ) {
+                currentFunction = node.child(1).text; // Function name
+            }
+        }
+
+        // Recursively traverse child nodes
+        for (let i = 0; i < node.childCount; i++) {
+            traverse(node.child(i));
+        }
+    };
+
+    traverse(tree.rootNode);
+    return currentFunction;
+}
 
 // Example usage
 // const startingFile = "v2/fileA.py"; // Change this if needed
@@ -193,4 +225,4 @@ function convertMapToMermaid(map) {
 //   console.log(mermaidSnip)
 // });
 
-module.exports = { resolveDependencies, convertMapToMermaid };
+module.exports = { resolveDependencies, convertMapToMermaid, extractFunctionFromPosition };

@@ -1,10 +1,10 @@
 const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
-const { resolveDependencies, convertMapToMermaid } = require('./functionCallExtractor'); // Importing the functionCallExtractor module
+const { resolveDependencies, convertMapToMermaid, extractFunctionFromPosition } = require('./functionCallExtractor'); // Importing the functionCallExtractor module
 
 function activate(context) {
-    let disposable = vscode.commands.registerCommand('extension.showMermaidFlowchart', async () => {
+    let disposable = vscode.commands.registerCommand('extension.showMermaidFlowchart', async (args) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage("No active editor found.");
@@ -13,36 +13,37 @@ function activate(context) {
 
         const selection = editor.selection;
         const selectedText = editor.document.getText(selection);
-
-        // Check if the selection is a function name
-        if (!selectedText) {
-            vscode.window.showErrorMessage("Please select a function name.");
-            return;
-        }
-
-        // Get file path
         const filePath = editor.document.uri.fsPath;
 
-        // Generate the Mermaid diagram based on the function calls
-        console.log("filepath: " + filePath);
-        console.log("selectedText: " + selectedText);
-        const mermaidSnip = await generateMermaidDiagram(filePath, selectedText);
+        let functionName = selectedText.trim();
+        let isFullFlow = false; // Flag to determine if it's a full flowchart
+
+        if (!functionName) {
+            // No function name selected, generate full flowchart for the entire file
+            isFullFlow = true;  // Indicating that we're showing the full flowchart
+            vscode.window.showInformationMessage("No specific function selected. Showing flowchart for all functions.");
+        } else {
+            // User has selected a function name
+            functionName = selectedText.trim();
+        }
+
+        // Generate the Mermaid diagram
+        const mermaidSnip = await generateMermaidDiagram(filePath, functionName, isFullFlow);
 
         if (!mermaidSnip) {
             vscode.window.showErrorMessage("Failed to generate Mermaid diagram.");
             return;
         }
 
-        console.log("Generated Mermaid Diagram:", mermaidSnip);
+        // Determine the title based on whether it's full flow or a specific function
+        const title = isFullFlow ? 'Full Flowchart' : `${functionName} Flowchart`;
 
-        // Open a WebView to display the Mermaid flowchart
+        // Open WebView with the flowchart
         const panel = vscode.window.createWebviewPanel(
             'mermaidFlowchart',
-            'Mermaid Flowchart',
+            title, // Dynamic title based on context
             vscode.ViewColumn.One,
-            {
-                enableScripts: true,
-            }
+            { enableScripts: true }
         );
 
         // Set the WebView content
@@ -52,35 +53,51 @@ function activate(context) {
     context.subscriptions.push(disposable);
 }
 
-async function generateMermaidDiagram(filePath, selectedFunction) {
+async function generateMermaidDiagram(filePath, selectedFunction, isFullFlow) {
     try {
-        console.log("Generating Mermaid diagram for:", filePath);
-        console.log("Selected function:", selectedFunction);
-
         // Resolve function calls for the given file
         const functionCalls = await resolveDependencies(filePath);
-        
-        console.log("Resolved function calls:", functionCalls);
 
         if (!functionCalls || functionCalls.size === 0) {
-            console.log("No function calls found.");
-            return "graph TD\n  No function calls found"; // Provide a fallback for no function calls
+            return "graph TD\n  No function calls found"; // Fallback if no function calls
         }
 
-        // Convert the function calls to Mermaid syntax
-        console.log("functioncalls:", [...functionCalls]);
+        // If a specific function was selected, generate the diagram for it, including recursive calls
+        if (!isFullFlow && selectedFunction) {
+            // Include all functions in the call chain for the selected function
+            let functionsToInclude = new Set();
+            let functionsToProcess = [selectedFunction];
+
+            while (functionsToProcess.length > 0) {
+                let currentFunction = functionsToProcess.pop();
+                if (!functionsToInclude.has(currentFunction)) {
+                    functionsToInclude.add(currentFunction);
+                    const calls = functionCalls.get(currentFunction) || [];
+                    calls.forEach((calledFunction) => {
+                        if (!functionsToInclude.has(calledFunction)) {
+                            functionsToProcess.push(calledFunction);
+                        }
+                    });
+                }
+            }
+
+            // Create a filtered functionCalls map with only the selected function and its dependencies
+            const filteredFunctionCalls = new Map();
+            functionsToInclude.forEach((func) => {
+                filteredFunctionCalls.set(func, functionCalls.get(func) || []);
+            });
+
+            return convertMapToMermaid(filteredFunctionCalls);
+        }
+
+        // If no function is selected or full flow, generate the diagram for all functions
         const mermaidStr = convertMapToMermaid(functionCalls);
-
-        console.log("Generated Mermaid Diagram String:", mermaidStr);
-
         return mermaidStr;
-
     } catch (error) {
         console.error("Error generating Mermaid diagram:", error);
         return null;
     }
 }
-
 
 function getWebviewContent(mermaidSnip) {
     return `
@@ -114,7 +131,6 @@ function getWebviewContent(mermaidSnip) {
         </html>
     `;
 }
-
 
 function escapeHtml(text) {
     return text
