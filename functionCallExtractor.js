@@ -83,7 +83,7 @@ async function extractFunctionCalls(filePath) {
 // Function to find all import statements in the file
 function findImports(filePath) {
   const sourceCode = fs.readFileSync(filePath, "utf-8");
-  const importRegex = /from\s+([a-zA-Z0-9_]+)\s+import\s+([a-zA-Z0-9_,\s]+)/g;
+  const importRegex = /from\s+([a-zA-Z0-9_]+)\s+import\s+([a-zA-Z0-9_,\s]+)/g; // from src.db.mongo_util import ( awefweewte,twewerm,ewe) // await self.gsdgsdgedg()
   let imports = [];
   let match;
   while ((match = importRegex.exec(sourceCode)) !== null) {

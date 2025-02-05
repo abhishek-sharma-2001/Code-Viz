@@ -119,161 +119,233 @@ async function generateMermaidDiagram(filePath, selectedFunction, isFullFlow) {
 function getWebviewContent(mermaidSnip) {
   return `
     <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mermaid Flowchart</title>
-        <script type="module">
-            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-            window.addEventListener('load', () => {
-                mermaid.initialize({ startOnLoad: true });
-                mermaid.init();
-            });
-        </script>
-        <style>
-            /* General Layout for the Page */
-            body {
-                font-family: 'Arial', sans-serif;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                background: linear-gradient(135deg, #e0e7f1, #f0f4f8); /* Soft gradient background */
-                box-sizing: border-box;
-                overflow: hidden;
-            }
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Flowchart with Pan, Zoom & Download</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg2png/1.0.4/svg2png.min.js"></script>
+    <style>
+        /* General Layout */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #e0e7f1, #f0f4f8);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
 
-            /* Container for the flowchart content */
-            .container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                max-width: 1200px;
-                padding: 30px;
-                background-color: #ffffff;
-                border-radius: 15px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-                overflow: hidden;
-                text-align: center;
-                max-height: 95vh;
-            }
+        /* Container */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+        }
 
-            /* Heading Style */
-            h1 {
-                font-size: 2.8rem;
-                color: #007ACC;
-                margin-bottom: 20px;
-                font-weight: bold;
-                letter-spacing: 1px;
-                text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-            }
+        /* Heading */
+        h1 {
+            font-size: 2.5rem;
+            color: #007ACC;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
 
-            /* Responsiveness for smaller screens */
-            @media (max-width: 768px) {
-                h1 {
-                    font-size: 2.2rem;
-                }
+        /* Zoom & Pan Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-                .mermaid {
-                    height: 400px;
-                }
-            }
+        /* Button Styling */
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-            @media (max-width: 480px) {
-                h1 {
-                    font-size: 1.8rem;
-                }
+        .zoom-in { background-color: #28a745; }
+        .zoom-out { background-color: #dc3545; }
+        .download-btn { background-color: #007bff; }
+        .reset-btn { background-color: #f39c12; }
 
-                .mermaid {
-                    height: 300px;
-                }
-            }
+        button:hover { opacity: 0.8; }
+        button:active { transform: scale(0.95); }
 
-            /* Styling for Mermaid chart */
-            .mermaid {
-                width: 100%;
-                height: 600px;
-                overflow: auto;
-                display: block;
-                margin: 20px 0;
-                border: 2px solid #007ACC; /* Border around the chart */
-                border-radius: 10px;
-                background-color: #f9f9f9; /* Light background for the chart */
-            }
+        /* Chart Wrapper for Panning */
+        .chart-container {
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+            border: 2px solid #007ACC;
+            border-radius: 10px;
+            position: relative;
+            cursor: grab;
+        }
 
-            /* Mermaid Specific Styles (Customizing Node and Arrow Styles) */
-            .mermaid .node rect {
-                fill: #4e73df; /* Blue Background */
-                stroke: #2c3e50; /* Darker border */
-                stroke-width: 2px;
-                rx: 8px; /* Rounded corners */
-                ry: 8px;
-            }
+        .chart-container:active {
+            cursor: grabbing;
+        }
 
-            .mermaid .node text {
-                font-family: 'Arial', sans-serif;
-                font-size: 16px;
-                fill: #ffffff; /* White text color */
-                font-weight: bold;
-                text-align: center;
-                letter-spacing: 0.5px;
-                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Light text shadow */
-                word-wrap: break-word;
-                white-space: normal;
-                padding: 10px; /* Padding for readability */
-            }
+        .chart-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-            /* Customizing edges (arrows between functions) */
-            .mermaid .edgePath .path {
-                stroke: #2ecc71; /* Green Arrows */
-                stroke-width: 3px;
-                fill: none;
-                marker-end: url(#arrowhead);
-            }
+        .mermaid {
+            transform-origin: 0 0;
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body>
 
-            .mermaid .edgePath .path:hover {
-                stroke: #1abc9c; /* Hover effect for arrows */
-                stroke-width: 4px;
-            }
+    <div class="container">
+        <h1>Mermaid Flowchart</h1>
 
-            .mermaid .edgeLabel {
-                font-family: 'Arial', sans-serif;
-                font-size: 14px;
-                fill: #e74c3c; /* Red color for edge labels */
-                font-weight: bold;
-            }
+        <!-- Zoom & Pan Controls -->
+        <div class="controls">
+            <button class="zoom-in" onclick="zoomIn()">Zoom In +</button>
+            <button class="zoom-out" onclick="zoomOut()">Zoom Out -</button>
+            <button class="reset-btn" onclick="resetView()">Reset View</button>
+            <button class="download-btn" onclick="downloadChart()">Download</button>
+        </div>
 
-            .mermaid .arrowheadPath {
-                fill: #2ecc71; /* Green Arrowheads */
-            }
-
-            /* Add a custom marker for arrowheads */
-            svg defs {
-                display: block;
-            }
-
-            svg defs marker {
-                fill: #2ecc71;
-                stroke: #1abc9c;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Mermaid Flowchart</h1>
-            <div class="mermaid">
-                ${escapeHtml(mermaidSnip)}
+        <!-- Chart Container for Panning -->
+        <div class="chart-container" id="chart-container">
+            <div class="chart-wrapper" id="chart-wrapper">
+                <div class="mermaid" id="mermaid-chart">
+                    ${escapeHtml(mermaidSnip)}
+                </div>
             </div>
         </div>
-    </body>
-    </html>
+    </div>
+
+    <script>
+        let scale = 1.0;
+        let posX = 0, posY = 0;
+        let isPanning = false, startX, startY;
+        const chartWrapper = document.getElementById("chart-wrapper");
+
+        // Zoom Functions
+        function zoomIn() {
+            scale += 0.1;
+            updateTransform();
+        }
+
+        function zoomOut() {
+            if (scale > 0.5) {
+                scale -= 0.1;
+                updateTransform();
+            }
+        }
+
+        function resetView() {
+            scale = 1.0;
+            posX = 0;
+            posY = 0;
+            updateTransform();
+        }
+
+        function updateTransform() {
+            chartWrapper.style.transform = \`translate(\${posX}px, \${posY}px) scale(\${scale})\`;
+        }
+
+        // Pan Functionality
+        document.getElementById("chart-container").addEventListener("mousedown", (event) => {
+            isPanning = true;
+            startX = event.clientX - posX;
+            startY = event.clientY - posY;
+        });
+
+        document.addEventListener("mousemove", (event) => {
+            if (isPanning) {
+                posX = event.clientX - startX;
+                posY = event.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener("mouseup", () => isPanning = false);
+
+        // Download Chart
+        function downloadChart() {
+    const svgElement = document.querySelector(".mermaid svg");
+
+    if (!svgElement) {
+        alert("Chart not loaded yet. Please try again.");
+        return;
+    }
+
+    // Clone the SVG to modify it without affecting the UI
+    const clonedSvg = svgElement.cloneNode(true);
+    clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+    // Get the bounding box of the actual graph (ignoring white space)
+    const bbox = svgElement.getBBox();
+    clonedSvg.setAttribute("viewBox", bbox.x + " " + bbox.y + " " + bbox.width + " " + bbox.height);
+    clonedSvg.setAttribute("width", bbox.width);
+    clonedSvg.setAttribute("height", bbox.height);
+
+    // Convert SVG to a PNG
+    const svgString = new XMLSerializer().serializeToString(clonedSvg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    img.onload = function () {
+        canvas.width = bbox.width;
+        canvas.height = bbox.height;
+        ctx.drawImage(img, 0, 0, bbox.width, bbox.height);
+        const pngFile = canvas.toDataURL("image/png");
+
+        let link = document.createElement("a");
+        link.href = pngFile;
+        link.download = "mermaid-chart.png";
+        link.click();
+    };
+
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgString)));
+}
+
+    </script>
+
+</body>
+</html>
   `;
 }
+
 
 
 
