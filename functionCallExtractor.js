@@ -137,6 +137,35 @@ async function resolveDependencies(filePath, visitedFiles = new Set()) {
 }
 
 /**
+ * Generates a Graphviz DOT format representation of function call relationships.
+ * @param {Map} allFunctionCalls - Function call map.
+ * @returns {string} - Graphviz DOT formatted string.
+ */
+function generateGraphviz(allFunctionCalls) {
+  let dotString = "digraph FunctionCalls {\n";
+  dotString += '  node [shape=box, style="rounded, filled", fillcolor="lightblue"];\n';
+
+  for (let [func, calls] of allFunctionCalls) {
+    for (let calledFunc of calls) {
+      dotString += `  "${func}" -> "${calledFunc}";\n`;
+    }
+  }
+
+  dotString += "}";
+  return dotString;
+}
+
+/**
+ * Saves a Graphviz DOT file.
+ * @param {string} dotContent - Graphviz formatted content.
+ * @param {string} outputFilePath - File path to save the content.
+ */
+function saveGraphvizFile(dotContent, outputFilePath) {
+  fs.writeFileSync(outputFilePath, dotContent, "utf-8");
+  console.log(`Graphviz file saved at: ${outputFilePath}`);
+}
+
+/**
  * Converts function call map into Mermaid.js syntax.
  * @param {Map} map - Function call map.
  * @returns {string} - Mermaid.js formatted string.
