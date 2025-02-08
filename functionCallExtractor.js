@@ -82,16 +82,46 @@ async function extractFunctionCalls(filePath) {
 
 // Function to find all import statements in the file
 function findImports(filePath) {
-  const sourceCode = fs.readFileSync(filePath, "utf-8");
-  const importRegex = /from\s+([a-zA-Z0-9_]+)\s+import\s+([a-zA-Z0-9_,\s]+)/g; // from src.db.mongo_util import ( awefweewte,twewerm,ewe) // await self.gsdgsdgedg()
-  let imports = [];
-  let match;
-  while ((match = importRegex.exec(sourceCode)) !== null) {
-    const moduleName = match[1];
-    const functions = match[2].split(",").map((f) => f.trim());
-    imports.push({ module: moduleName, functions });
-  }
-  return imports;
+    const sourceCode = fs.readFileSync(filePath, "utf-8");
+
+    let imports = [];
+
+    // Matches: import module OR import module as alias
+    const importRegex = /^\s*import\s+([a-zA-Z0-9_\.]+)(?:\s+as\s+([a-zA-Z0-9_]+))?/gm;
+    
+    // Matches: from module import a, b, c (supports multi-line)
+    const fromImportRegex = /^\s*from\s+([a-zA-Z0-9_\.]+)\s+import\s+([\s\S]+?)(?=\n\s*(?:from|import|\#|$))/gm;
+
+    let match;
+
+    // Handle "import module" and "import module as alias"
+    while ((match = importRegex.exec(sourceCode)) !== null) {
+        imports.push({
+            module: match[1].trim(),
+            alias: match[2] ? match[2].trim() : null,
+            functions: []
+        });
+    }
+
+    // Handle "from module import a, b, c"
+    while ((match = fromImportRegex.exec(sourceCode)) !== null) {
+        const moduleName = match[1].trim(); 
+        const functions = match[2]
+            .replace(/\s+/g, " ") // Normalize spaces
+            .replace(/#.*$/, "") // Remove comments
+            .replace(/[()\n]/g, "") // Remove brackets & newlines
+            .split(",") // Split on commas
+            .map(f => f.trim()) // Trim spaces
+            .filter(f => f !== ""); // Remove empty values
+
+        imports.push({
+            module: moduleName,
+            alias: null,
+            functions: functions
+        });
+    }
+
+    return imports;
 }
 
 // Function to resolve dependencies dynamically by detecting imported modules
@@ -138,27 +168,35 @@ function convertMapToMermaid(map) {
     }
 
     let mermaidStr = "graph TD\n";
+    let allFunctions = new Set();
 
-    // Handling case for single function with no calls
-    if (map.size === 1) {
-        const [key, value] = [...map.entries()][0];
-        // Add the function itself if there are no calls
-        mermaidStr += `  ${key}\n`;
-    } else {
-        map.forEach((value, key) => {
-            if (Array.isArray(value)) {
-                const uniqueValues = [...new Set(value)]; // Remove duplicates
-                uniqueValues.forEach((v) => {
-                    mermaidStr += `  ${key} --> ${v}\n`;
-                });
-            } else {
-                mermaidStr += `  ${key} --> ${value}\n`;
-            }
-        });
-    }
+    // Collect all function names
+    map.forEach((calls, func) => {
+        allFunctions.add(func);
+        calls.forEach((calledFunc) => allFunctions.add(calledFunc));
+    });
+
+    // Generate graph edges
+    map.forEach((calls, func) => {
+        if (calls.length === 0) {
+            mermaidStr += `  ${func}["${func}"]\n`;  // Standalone node
+        } else {
+            calls.forEach((calledFunc) => {
+                mermaidStr += `  ${func} --> ${calledFunc}\n`;
+            });
+        }
+    });
+
+    // Ensure all functions (even without calls) are included
+    allFunctions.forEach((func) => {
+        if (!mermaidStr.includes(`  ${func}["${func}"]`)) {
+            mermaidStr += `  ${func}["${func}"]\n`;
+        }
+    });
 
     return mermaidStr;
 }
+
 
 async function extractFunctionFromPosition(filePath, position) {
     const parser = new Parser();
