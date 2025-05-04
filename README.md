@@ -1,65 +1,95 @@
-# hello-world README
+# functra - Function Flow Visualizer
 
-This is the README for your extension "hello-world". After writing up a brief description, we recommend including the following sections.
-
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+functra is a powerful VS Code extension designed to **visualize function flow** within your codebase. It allows developers to track the execution of API functions and custom-made functions from start to end in an interactive **graph-based view**. With built-in search functionality, you can quickly find and explore specific functions within complex code structures.
 
 ---
 
-## Working with Markdown
+## Demo
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+![Demo](demo_functra.gif)
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+## ✨ Features
 
-## For more information
+✅ **Graph-Based Function Flow Visualization**  
+Visualize the flow and dependencies between functions in your code using an interactive **graph**, making it easier to understand execution order.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+✅ **Search & Highlight Functions**  
+Easily find and highlight any function in the graph with a quick search.
 
-**Enjoy!**
+✅ **Supports Custom Functions**  
+Captures **user-defined** functions, giving you a complete picture of function interactions.
+
+✅ **Lightweight & Fast**  
+Optimized for performance, enabling smooth interaction even with large codebases.
+
+✅ **Download Graph as PNG**  
+Export the visualized graph as a **PNG image**, now with **timestamped filenames** for better organization.
+
+✅ **Loading Indicator**  
+Displays a **loading spinner** during initialization for better user feedback.
+
+✅ **Optimized for Python and FastAPI**  
+Specifically designed to work seamlessly with **Python** and **FastAPI** projects. Experimental support for other languages is available and may vary in stability.
+
+
+## Installation
+
+1. Open **VS Code**
+2. Go to the **Extensions** Marketplace (`Ctrl+Shift+X` / `Cmd+Shift+X` on Mac)
+3. Search for **functra**
+4. Click **Install**
+5. Enjoy seamless function visualization!
+
+---
+
+## Usage
+
+1. Open your project in VS Code.
+2. Select a function **without parentheses**.
+3. Right-click and choose **`functra`** from the context menu.
+4. The extension will analyze your code and generate a **graph-based function flow**.
+5. Use the **search bar** to find specific functions.
+6. Double Click on a function node to view its details / Definition.
+7. Click on **Download** to Download the Flowchart in the form of PNG.
+
+---
+
+## Requirements
+
+- **VS Code v1.65+**
+- **Node.js (Optional, for enhanced processing speed)**
+
+---
+
+## Extension Settings
+
+functra contributes the following settings:
+
+- `functra.enable`: Enable/disable functra.
+
+---
+
+## Known Issues
+
+- Large projects may take a few seconds to process.
+- Some dynamically generated functions may not appear.
+
+If you encounter any issues, please report them on our [GitHub Issues](https://github.com) page.
+
+---
+
+## Contributing
+
+We welcome contributions! If you'd like to improve functra, feel free to submit a PR on [GitHub](https://github.com/).
+
+Made with ❤️ by Abhishek Sharma and Prem Kothawle
+---
+
+## License
+
+[MIT License](LICENSE)
+
+---
+
+**Enjoy using functra? Give us a 5⭐ on VSCode Market Place and ⭐ on GitHub!** 🚀
+
